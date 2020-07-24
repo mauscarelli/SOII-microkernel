@@ -19,8 +19,6 @@ typedef struct{
     PTR_DESC_PROC Q;
 } semaforo;
 
-
-
 extern void far cria_processo(void far (*end_proc)(),char nome_p[35]);
 
 extern void far termina_processo();
