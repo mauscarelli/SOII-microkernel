@@ -104,8 +104,6 @@ void far V(semaforo *sem){
    enable();
 }
 
-semaforo s1;
-
 void far cria_processo(void far (*end_proc)(),char nome_p[35])
 {
    PTR_DESC_PROC p,s;
@@ -140,41 +138,6 @@ void far termina_processo(){
    while(1);
 }
 
-void far COROTINAA(){
-   int i = 2000;
-   while(i--){
-     P(&s1);
-     fprintf(teste,"A");
-   }
-   termina_processo();
-}
-
-void far COROTINAB(){
-   int i = 2000;
-   while(i--){
-     fprintf(teste,"B");
-     V(&s1);
-   }
-   termina_processo();
-}
-
-void far COROTINAC(){
-   int i = 2000;
-   while(i--){
-     P(&s1);
-     fprintf(teste,"C");
-   }
-   termina_processo();
-}
-
- void far COROTINAD(){
-   int i = 2000;
-   while(i--){
-     fprintf(teste,"D");
-     V(&s1);
-   }
-   termina_processo();
-}
 
 void far escalador(){
    p_est->p_origem = d_esc;
@@ -204,15 +167,5 @@ void far dispara_sistema(){
    desc_dispara = cria_desc();
    newprocess(escalador,d_esc);
    transfer(desc_dispara,d_esc);
-}
-
-main(){
-   teste = fopen("teste.txt","w");
-   inicia_semaforo(&s1,100);
-   cria_processo(COROTINAA,"COROTINA A");
-   cria_processo(COROTINAB,"COROTINA B");
-   cria_processo(COROTINAC,"COROTINA C");
-   cria_processo(COROTINAD,"COROTINA D");
-   dispara_sistema();
 }
 

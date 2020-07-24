@@ -5,7 +5,6 @@
 
 PTR_DESC d_esc,d_main;
 
-FILE * teste;
 
 typedef struct registros{
    unsigned bx1,es1;
@@ -41,8 +40,7 @@ void far volta_DOS(){
    disable();
    setvect(8,p_est->int_anterior);
    enable();
-   fprintf(teste,"\nVolta DOS\n");
-   fclose(teste);
+   printf("\nVolta DOS\n");
    exit(0);
 }
 
@@ -71,7 +69,7 @@ void far P(semaforo *sem){
       PTR_DESC_PROC p;
       PTR_DESC_PROC p_aux;
       prim->estado=bloq_P;
-      fprintf(teste,"\nBloqueia processo: %s\n",prim->nome);
+      printf("\nBloqueia processo: %s\n",prim->nome);
       if(sem->Q==NULL){
          sem->Q=prim;
       }
@@ -99,12 +97,10 @@ void far V(semaforo *sem){
       sem->Q = p->fila_sem;
       p->fila_sem = NULL;
       p->estado = ativo;
-      fprintf(teste,"\nDesbloqueia processo: %s\n",prim->nome);
+      printf("\nDesbloqueia processo: %s\n",prim->nome);
    }
    enable();
 }
-
-semaforo s1;
 
 void far cria_processo(void far (*end_proc)(),char nome_p[35])
 {
@@ -140,41 +136,6 @@ void far termina_processo(){
    while(1);
 }
 
-void far COROTINAA(){
-   int i = 2000;
-   while(i--){
-     P(&s1);
-     fprintf(teste,"A");
-   }
-   termina_processo();
-}
-
-void far COROTINAB(){
-   int i = 2000;
-   while(i--){
-     fprintf(teste,"B");
-     V(&s1);
-   }
-   termina_processo();
-}
-
-void far COROTINAC(){
-   int i = 2000;
-   while(i--){
-     P(&s1);
-     fprintf(teste,"C");
-   }
-   termina_processo();
-}
-
- void far COROTINAD(){
-   int i = 2000;
-   while(i--){
-     fprintf(teste,"D");
-     V(&s1);
-   }
-   termina_processo();
-}
 
 void far escalador(){
    p_est->p_origem = d_esc;
@@ -204,15 +165,5 @@ void far dispara_sistema(){
    desc_dispara = cria_desc();
    newprocess(escalador,d_esc);
    transfer(desc_dispara,d_esc);
-}
-
-main(){
-   teste = fopen("teste.txt","w");
-   inicia_semaforo(&s1,100);
-   cria_processo(COROTINAA,"COROTINA A");
-   cria_processo(COROTINAB,"COROTINA B");
-   cria_processo(COROTINAC,"COROTINA C");
-   cria_processo(COROTINAD,"COROTINA D");
-   dispara_sistema();
 }
 

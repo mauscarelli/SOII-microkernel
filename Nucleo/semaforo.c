@@ -1,10 +1,12 @@
 #include<Nucleo.h>
 
+/*semaforo s1;*/
+
 void far COROTINAA(){
    int i = 2000;
    while(i--){
-     P(&s1);
-     fprintf(teste,"A");
+     /*P(&s1);*/
+     printf("A");
    }
    termina_processo();
 }
@@ -12,8 +14,8 @@ void far COROTINAA(){
 void far COROTINAB(){
    int i = 2000;
    while(i--){
-     fprintf(teste,"B");
-     V(&s1);
+     printf("B");
+     /*V(&s1);*/
    }
    termina_processo();
 }
@@ -21,8 +23,8 @@ void far COROTINAB(){
 void far COROTINAC(){
    int i = 2000;
    while(i--){
-     P(&s1);
-     fprintf(teste,"C");
+     /*P(&s1);*/
+     printf("C");
    }
    termina_processo();
 }
@@ -30,15 +32,14 @@ void far COROTINAC(){
  void far COROTINAD(){
    int i = 2000;
    while(i--){
-     fprintf(teste,"D");
-     V(&s1);
+     printf("D");
+     /*V(&s1);*/
    }
    termina_processo();
 }
 
 main(){
-   teste = fopen("teste.txt","w");
-   inicia_semaforo(&s1,100);
+   /*inicia_semaforo(&s1,100);*/
    cria_processo(COROTINAA,"COROTINA A");
    cria_processo(COROTINAB,"COROTINA B");
    cria_processo(COROTINAC,"COROTINA C");
