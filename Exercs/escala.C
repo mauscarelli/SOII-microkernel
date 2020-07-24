@@ -19,10 +19,8 @@ APONTA_REG_CRIT a;
 
 typedef struct desc_p{
   char nome[35];
-  enum{ativo,bloq_P,terminado} estado;
+  enum{ativo,terminado} estado;
   PTR_DESC contexto;
-
-  struct desc_p *fila_sem;
 
   struct desc_p *prox_desc;
 } DESCRITOR_PROC;
@@ -30,11 +28,6 @@ typedef struct desc_p{
 typedef DESCRITOR_PROC *PTR_DESC_PROC;
 
 PTR_DESC_PROC prim = NULL;
-
-typedef struct{
-    int s;
-    PTR_DESC_PROC Q;
-} semaforo;
 
 void far volta_DOS(){
    disable();
@@ -53,53 +46,6 @@ PTR_DESC_PROC far Procura_prox_ativo(){
    if(s->estado != ativo)
       return NULL;
    return s;
-}
-
-void far inicia_semaforo(semaforo *sem, int n){
-    sem->s=n;
-    sem->Q=NULL;
-}
-
-void far P(semaforo *sem){
-   disable();
-   if(sem->s>0){
-      sem->s--;
-   }
-   else{
-      PTR_DESC_PROC p;
-      PTR_DESC_PROC p_aux;
-      prim->estado=bloq_P;
-      printf("\nBloqueia processo: %s\n",prim->nome);
-      if(sem->Q==NULL){
-         sem->Q=prim;
-      }
-      else{
-         p=sem->Q;
-         while(p->fila_sem){
-            p=p->fila_sem;
-         }
-         p->fila_sem=prim;
-      }
-      p_aux=prim;
-      prim=Procura_prox_ativo();
-      if(prim==NULL)
-        volta_DOS();
-      transfer(p_aux->contexto,prim->contexto);
-   }
-   enable();
-}
-
-void far V(semaforo *sem){
-   disable();
-   if(sem->Q == NULL) sem->s++;
-   else{
-      PTR_DESC_PROC p = sem->Q;
-      sem->Q = p->fila_sem;
-      p->fila_sem = NULL;
-      p->estado = ativo;
-      printf("\nDesbloqueia processo: %s\n",prim->nome);
-   }
-   enable();
 }
 
 void far cria_processo(void far (*end_proc)(),char nome_p[35])
@@ -166,4 +112,41 @@ void far dispara_sistema(){
    newprocess(escalador,d_esc);
    transfer(desc_dispara,d_esc);
 }
+
+void far COROTINAA(){
+   int i = 2000;
+   while(i--){
+     printf("A");
+   }
+ }
+
+ void far COROTINAB(){
+   int i = 4000;
+   while(i--){
+     printf("B");
+   }
+ }
+
+ void far COROTINAC(){
+   int i = 5000;
+   while(i--){
+     printf("A");
+   }
+ }
+
+ void far COROTINAD(){
+   int i = 3000;
+   while(i--){
+     printf("B");
+   }
+ }
+
+main(){
+   cria_processo(COROTINAA,"COROTINA A");
+   cria_processo(COROTINAB,"COROTINA B");
+   cria_processo(COROTINAC,"COROTINA C");
+   cria_processo(COROTINAD,"COROTINA D");
+   dispara_sistema();
+}
+
 
