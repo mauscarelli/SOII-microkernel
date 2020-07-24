@@ -5,7 +5,6 @@
 
 PTR_DESC d_esc,d_main;
 
-FILE * teste;
 
 typedef struct registros{
    unsigned bx1,es1;
@@ -41,8 +40,7 @@ void far volta_DOS(){
    disable();
    setvect(8,p_est->int_anterior);
    enable();
-   fprintf(teste,"\nVolta DOS\n");
-   fclose(teste);
+   printf("\nVolta DOS\n");
    exit(0);
 }
 
@@ -71,7 +69,7 @@ void far P(semaforo *sem){
       PTR_DESC_PROC p;
       PTR_DESC_PROC p_aux;
       prim->estado=bloq_P;
-      fprintf(teste,"\nBloqueia processo: %s\n",prim->nome);
+      printf("\nBloqueia processo: %s\n",prim->nome);
       if(sem->Q==NULL){
          sem->Q=prim;
       }
@@ -99,7 +97,7 @@ void far V(semaforo *sem){
       sem->Q = p->fila_sem;
       p->fila_sem = NULL;
       p->estado = ativo;
-      fprintf(teste,"\nDesbloqueia processo: %s\n",prim->nome);
+      printf("\nDesbloqueia processo: %s\n",prim->nome);
    }
    enable();
 }
