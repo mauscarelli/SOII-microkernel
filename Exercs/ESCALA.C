@@ -1,4 +1,37 @@
-#include "nucleo.h"
+#include<System.h>
+#include<stdio.h>
+#include<conio.h>
+
+/*** Estruturas ***/
+
+/* Cada processo deve ter um descritor associado */
+typedef struct desc_p {
+    /* Nome do processo */
+    char nome[35];
+
+    /* Estado do processo */
+    enum {
+        ativo, terminado
+    } estado;
+
+    /* Ponteiro para descritor de contexto */
+    PTR_DESC contexto;
+
+    /* Ponteiro para o próximo descritor de processo */
+    struct desc_p *prox_desc;
+} DESCRITOR_PROC;
+
+/* Ponteiro para a fila de processos */
+typedef DESCRITOR_PROC *PTR_DESC_PROC;
+
+typedef struct registros {
+    unsigned bx1, es1;
+} regis;
+
+typedef union k {
+    regis x;
+    char far *y;
+} APONTA_REG_CRIT;
 
 /*** Variáveis globais ***/
 
@@ -149,69 +182,45 @@ PTR_DESC_PROC far Procura_prox_ativo() {
     return s;
 }
 
-/*** Primitivas para suporte dos semáforos ***/
+/* Processos exemplo */
 
-/* Primitiva para iniciação o semáforo */
-void far inicia_semaforo(semaforo *sem, int n) {
-    sem->s = n;
-    sem->Q = NULL;
-}
-
-/* Primitiva da operação P (ou Down) */
-void far P(semaforo *sem) {
-    /* Desabilita interrupções - P deve ser indivisível */
-    disable();
-
-    /* Decrementa s */
-    if(sem->s > 0) sem->s--;
-    else {
-        /* Bloqueia processo na fila */
-        PTR_DESC_PROC p;
-        PTR_DESC_PROC p_aux;
-
-        /* Muda estado do processo atual para bloq_P */
-        prim->estado = bloq_P;
-        printf("\nBloqueia processo: %s\n", prim->nome);
-
-        /* Intere descritor do processo na fila */
-        if(sem->Q == NULL) sem->Q = prim;
-        else {
-            p = sem->Q;
-            while(p->fila_sem) p = p->fila_sem;
-            p->fila_sem = prim;
-        }
-        p_aux = prim;
-
-        /* Acha próximo processo pronto */
-        prim = Procura_prox_ativo();
-
-        if(prim == NULL) volta_DOS();
-        transfer(p_aux->contexto, prim->contexto);
+void far COROTINAA() {
+    int i = 2000;
+    while (i--) {
+        printf("A");
     }
-
-    enable();
 }
 
-/* Primitiva da operação V (ou Up) */
-void far V(semaforo *sem) {
-    /* Desabilita interrupções - V deve ser indivisível */
-   disable();
+void far COROTINAB() {
+    int i = 4000;
+    while (i--) {
+        printf("B");
+    }
+}
 
-   /* Incrementa s */
-   if(sem->Q == NULL) sem->s++;
-   else {
-      PTR_DESC_PROC p = sem->Q;
+void far COROTINAC() {
+    int i = 5000;
+    while (i--) {
+        printf("A");
+    }
+}
 
-      /* Retira o primeiro processo dda fila */
-      sem->Q = p->fila_sem;
-      p->fila_sem = NULL;
+void far COROTINAD() {
+    int i = 3000;
+    while (i--) {
+        printf("B");
+    }
+}
 
-      /* Muda o estado ddeste processo como "ativo" */
-      p->estado = ativo;
-      printf("\nDesbloqueia processo: %s\n", prim->nome);
-   }
+main() {
+    /* Cria processos */
+    cria_processo(COROTINAA, "COROTINA A");
+    cria_processo(COROTINAB, "COROTINA B");
+    cria_processo(COROTINAC, "COROTINA C");
+    cria_processo(COROTINAD, "COROTINA D");
 
-   enable();
+    /* Transfere controle para o escalador */
+    dispara_sistema();
 }
 
 
